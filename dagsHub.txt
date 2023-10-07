@@ -1,0 +1,43 @@
+Anaconda Prompt ou Terminal VSCode
+$ git config --global user.email ".."
+$ git config --global user.name ".."
+
+0. Créer un repo 
+Create -> New repo -> mlops_bootcamp (Prive) -> Crgit ct eate
+
+1. Initialize a git repository 
+
+$ git init
+$ git add .
+$ git branch -M main
+$ git commit -m "first commit"
+$ git remote add origin https://dagshub.com/bassem.benhamed/mlops_bootcamp.git
+$ git push -u origin main
+
+
+Ajouter bassem.benhamed en tant que collaborateur
+Settings -> collaboration -> bassem.benhamed (Add New)
+
+2. Initialize a DVC project and track data
+
+$ touch DATAFILE.md
+$ dvc init 
+$ dvc add DATAFILE.md
+$ dvc add Data
+$ dvc remote add origin https://dagshub.com/bassem.benhamed/mlops_bootcamp.dvc
+$ dvc remote modify origin --local auth basic
+$ dvc remote modify origin --local user bassem.benhamed
+$ dvc remote modify origin --local password <token> # Your settings -> Tokens -> Copy
+
+$ git add .
+$ git commit -m "first data file"
+$ git push
+
+$ dvc push -r origin
+
+3. Modification de code 
+
+$ git add .
+$ git commit -m "nom significatif commit"
+$ git push -u origin main
+

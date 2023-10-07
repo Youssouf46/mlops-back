@@ -1,0 +1,6 @@
+{
+    "python.terminal.activate Environment": true,
+    "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+    "python.condaPath": "C:\\Users\\hp\\anaconda3\\Scripts\\conda.exe"
+
+}
