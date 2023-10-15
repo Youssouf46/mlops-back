@@ -2,31 +2,49 @@
 import pandas as pd
 import pickle
 import datetime as dt
+
+# Supposons que vous avez une liste nommée training_cols
+training_cols = ['rank_dif', 'goals_dif', 'goals_dif_l5', 'goals_suf_dif','goals_suf_dif_l5', 'goals_per_ranking_dif', 'dif_rank_agst','dif_rank_agst_l5', 'dif_points_rank', 'dif_points_rank_l5','is_friendly_0', 'is_friendly_1']
+
+# Enregistrez la liste dans un fichier pickle
+with open('training_cols.pkl', 'wb') as f:
+    pickle.dump(training_cols, f)
+
 """
 This function serves to clean the incoming new data in production when it is on csv format
 """
 
-#def fix_missing_cols(training_cols, new_data):
-#    missing_cols = set(training_cols) - set(new_data.columns)
-#     # Add a missing column in test set with default value equal to 0
-#    for c in missing_cols:
-#       new_data[c] = 0
+def fix_missing_cols(training_cols, new_data):
+    missing_cols = set(training_cols) - set(new_data.columns)
+     # Add a missing column in test set with default value equal to 0
+    for c in missing_cols:
+       new_data[c] = 0
     # Ensure the order of column in the test set is in the same order than in train set
-#    new_data = new_data[training_cols]
-#    return new_data
+    new_data = new_data[training_cols]
+    return new_data
 
 
-
-
-def clean_data(df):
-    def result_finder(home, away):
+def result_finder(home, away):
         if home > away:
           return pd.Series([0, 3, 0])
         if home < away:
           return pd.Series([1, 0, 3])
         else:
           return pd.Series([2, 1, 1])
+        
+def find_friendly(x):
+    if x == "Friendly":
+      return 1
+    else: 
+      return 0
 
+def no_draw(x):
+       if x == 2:
+        return 1
+       else:
+        return x
+       
+def clean_data(df):
     results = df.apply(lambda x: result_finder(x["home_score"], x["away_score"]), axis=1)
 
     df[["result", "home_team_points", "away_team_points"]] = results
@@ -121,11 +139,6 @@ def clean_data(df):
 
     full_df = pd.concat([df, match_stats.reset_index(drop=True)], axis=1, ignore_index=False)
 
-    def find_friendly(x):
-        if x == "Friendly":
-          return 1
-        else: 
-         return 0
 
     full_df["is_friendly"] = full_df["tournament"].apply(lambda x: find_friendly(x))
 
@@ -146,12 +159,6 @@ def clean_data(df):
 
     df = base_df_no_fg
     
-    
-    def no_draw(x):
-       if x == 2:
-        return 1
-       else:
-        return x
 
     df["target"] = df["result"].apply(lambda x: no_draw(x))
 
@@ -183,5 +190,8 @@ def clean_data(df):
     # Sélectionne les colonnes finales à inclure dans le modèle.
     model_df = base[["home_team", "away_team", "target", "rank_dif", "goals_dif", "goals_dif_l5", "goals_suf_dif", "goals_suf_dif_l5", "goals_per_ranking_dif", "dif_rank_agst", "dif_rank_agst_l5", "dif_points_rank", "dif_points_rank_l5", "is_friendly_0", "is_friendly_1"]]
    
+    with open('training_cols.pkl' , 'rb') as f:
+        training_cols = pickle.load(f)  
+    df = fix_missing_cols(training_cols,model_df)
 
-    return model_df
+    return df
