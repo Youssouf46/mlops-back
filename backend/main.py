@@ -62,11 +62,22 @@ def return_predictions(file: UploadFile = File(...)):
 
 
 # this endpoint receives data in the form of json (informations about one transaction)
-@app.post("/predict")
+"""@app.post("/predict")
 def predict(data : TransactionModel):
     received = data.dict()
     df =  pd.DataFrame(received,index=[0])
     preprocessed_data = clean_data_json(df)
+    predictions = model.predict(preprocessed_data)
+    return {"predictions": predictions.tolist()}
+    """
+
+@app.post("/predict")
+def predict(data: TransactionModel):
+    received = data.dict()
+    print(received) 
+    df = pd.DataFrame([received])  # Créez un DataFrame à partir des données reçues
+    preprocessed_data = clean_data_json(df)
+    # Assurez-vous d'avoir le modèle `model` approprié pour faire des prédictions
     predictions = model.predict(preprocessed_data)
     return {"predictions": predictions.tolist()}
 
