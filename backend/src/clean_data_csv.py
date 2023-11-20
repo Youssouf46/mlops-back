@@ -43,7 +43,37 @@ def no_draw(x):
         return 1
        else:
         return x
-       
+
+
+def teamstat(df):
+    results = df.apply(lambda x: result_finder(x["home_score"], x["away_score"]), axis=1)
+
+    df[["result", "home_team_points", "away_team_points"]] = results
+    df["rank_dif"] = df["rank_home"] - df["rank_away"]
+    df["sg"] = df["home_score"] - df["away_score"]
+    df["points_home_by_rank"] = df["home_team_points"]/df["rank_away"]
+    df["points_away_by_rank"] = df["away_team_points"]/df["rank_home"]
+    
+    home_team = df[["date", "home_team", "home_score", "away_score", "rank_home", "rank_away","rank_change_home", "total_points_home", "result", "rank_dif", "points_home_by_rank", "home_team_points"]]
+
+    away_team = df[["date", "away_team", "away_score", "home_score", "rank_away", "rank_home","rank_change_away", "total_points_away", "result", "rank_dif", "points_away_by_rank", "away_team_points"]]
+    
+    home_team.columns = [h.replace("home_", "").replace("_home", "").replace("away_", "suf_").replace("_away", "_suf") for h in home_team.columns]
+
+    away_team.columns = [a.replace("away_", "").replace("_away", "").replace("home_", "suf_").replace("_home", "_suf") for a in away_team.columns]
+    
+    team_stats = home_team.append(away_team)#.sort_values("date")
+
+    team_stats_raw = team_stats.copy()
+
+    return team_stats_raw
+
+    
+
+   
+
+
+
 def clean_data(df):
     results = df.apply(lambda x: result_finder(x["home_score"], x["away_score"]), axis=1)
 
@@ -64,6 +94,7 @@ def clean_data(df):
     team_stats = home_team.append(away_team)#.sort_values("date")
 
     team_stats_raw = team_stats.copy()
+  
 
 
 
@@ -189,9 +220,69 @@ def clean_data(df):
 
     # Sélectionne les colonnes finales à inclure dans le modèle.
     model_df = base[["home_team", "away_team", "target", "rank_dif", "goals_dif", "goals_dif_l5", "goals_suf_dif", "goals_suf_dif_l5", "goals_per_ranking_dif", "dif_rank_agst", "dif_rank_agst_l5", "dif_points_rank", "dif_points_rank_l5", "is_friendly_0", "is_friendly_1"]]
-   
+
     with open('training_cols.pkl' , 'rb') as f:
         training_cols = pickle.load(f)  
     df = fix_missing_cols(training_cols,model_df)
 
     return df
+
+
+
+
+def find_stats(team_name,data):
+        team_stats_raw=teamstat(data)
+        # Sélectionner tous les jeux passés de l'équipe spécifiée, triés par date.
+        past_games = team_stats_raw[(team_stats_raw["team"] == team_name)].sort_values("date")
+        # Sélectionner les cinq derniers jeux de l'équipe spécifiée, triés par date.
+        last5 = team_stats_raw[(team_stats_raw["team"] == team_name)].sort_values("date").tail(5)
+       # Extraire les statistiques pertinentes de l'équipe spécifiée.
+        team_rank = past_games["rank"].values[-1]  # Classement actuel de l'équipe.
+        team_goals = past_games.score.mean()        # Moyenne des buts marqués par l'équipe dans tous les jeux passés.
+        team_goals_l5 = last5.score.mean()          # Moyenne des buts marqués par l'équipe dans les cinq derniers jeux.
+        team_goals_suf = past_games.suf_score.mean()  # Moyenne des buts encaissés par l'équipe dans tous les jeux passés.
+        team_goals_suf_l5 = last5.suf_score.mean()    # Moyenne des buts encaissés par l'équipe dans les cinq derniers jeux.
+        team_rank_suf = past_games.rank_suf.mean()    # Moyenne du classement de l'opposition dans tous les jeux passés.
+        team_rank_suf_l5 = last5.rank_suf.mean()      # Moyenne du classement de l'opposition dans les cinq derniers jeux.
+        team_gp_rank = past_games.points_by_rank.mean()  # Moyenne des points par classement dans tous les jeux passés.
+        team_gp_rank_l5 = last5.points_by_rank.mean()    # Moyenne des points par classement dans les cinq derniers jeux.
+
+        # Retourner une liste contenant toutes les statistiques extraites.
+        return [team_rank, team_goals, team_goals_l5, team_goals_suf, team_goals_suf_l5,
+                team_rank_suf, team_rank_suf_l5, team_gp_rank, team_gp_rank_l5]
+
+
+
+def find_features(team_1, team_2):
+        # Calculer la différence entre les classements des deux équipes.
+        rank_dif = team_1[0] - team_2[0]
+
+        # Calculer la différence entre les moyennes de buts marqués par les deux équipes.
+        goals_dif = team_1[1] - team_2[1]
+       
+        # Calculer la différence entre les moyennes de buts marqués par les deux équipes dans les cinq derniers jeux.
+        goals_dif_l5 = team_1[2] - team_2[2]
+
+        # Calculer la différence entre les moyennes de buts encaissés par les deux équipes.
+        goals_suf_dif = team_1[3] - team_2[3]
+
+        # Calculer la différence entre les moyennes de buts encaissés par les deux équipes dans les cinq derniers jeux.
+        goals_suf_dif_l5 = team_1[4] - team_2[4]
+
+        # Calculer la différence entre le ratio buts marqués/classement pour les deux équipes.
+        goals_per_ranking_dif = (team_1[1] / team_1[5]) - (team_2[1] / team_2[5])
+        
+        # Calculer la différence entre les classements moyens de l'opposition pour les deux équipes.
+        dif_rank_agst = team_1[5] - team_2[5]
+
+        # Calculer la différence entre les classements moyens de l'opposition dans les cinq derniers jeux pour les deux équipes.
+        dif_rank_agst_l5 = team_1[6] - team_2[6]
+
+        # Calculer la différence entre les moyennes de points par classement pour les deux équipes.
+        dif_gp_rank = team_1[7] - team_2[7]
+
+        # Calculer la différence entre les moyennes de points par classement dans les cinq derniers jeux pour les deux équipes.
+        dif_gp_rank_l5 = team_1[8] - team_2[8]
+
+        return [rank_dif, goals_dif, goals_dif_l5, goals_suf_dif, goals_suf_dif_l5, goals_per_ranking_dif,
+                dif_rank_agst, dif_rank_agst_l5, dif_gp_rank, dif_gp_rank_l5, 1, 0]
