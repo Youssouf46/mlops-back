@@ -13,12 +13,16 @@ import io
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
-
 # defines an h1 header
-st.title("Predict the winner champion afrique")
-st.subheader("Enter details below")
+#st.title("Predict the champion winner of Africa")
+st.markdown('<h1 style="background-color: lightblue; padding: 20px;">Predict the champion winner of Africa</h1>', unsafe_allow_html=True)
+st.write(" ")
+# Ajouter une image depuis une URL
+image_url = "affricacup.jpg"
+st.image(image_url, caption='Affrica 2024', use_column_width=True)
+#st.subheader("Enter details below")
     
-st.subheader("Or Enter your historical transactions csv file")
+st.subheader("Enter your historical transactions csv file")
 # displays a file uploader widget
 data = st.file_uploader("Choose a csv file for data")
 predict = st.file_uploader("Choose a csv file for predict")
@@ -26,10 +30,9 @@ predict = st.file_uploader("Choose a csv file for predict")
 
 if data is not None and predict is not None:
     file = {"file_predict": predict.getvalue(),"data_file": data.getvalue()}
-    res = requests.post("http://127.0.0.1:8080/predict/csv", files=file)
+    res = requests.post("http://192.168.149.51:8080/predict/csv", files=file)
     #res = requests.post("https://backendapiahmed.herokuapp.com/predict/csv", files=file)
     #res = requests.post("http://lb-backendapp-1500115353.us-east-1.elb.amazonaws.com/predict/csv", files=file)
-    
     final_tables = res.json().get('final_table')
     j=0
     for ft in final_tables:

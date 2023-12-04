@@ -1,14 +1,14 @@
 
 import pandas as pd
-import pickle
-import datetime as dt
+#import pickle
+#import datetime as dt
 
 # Supposons que vous avez une liste nommée training_cols
 training_cols = ['rank_dif', 'goals_dif', 'goals_dif_l5', 'goals_suf_dif','goals_suf_dif_l5', 'goals_per_ranking_dif', 'dif_rank_agst','dif_rank_agst_l5', 'dif_points_rank', 'dif_points_rank_l5','is_friendly_0', 'is_friendly_1']
 
 # Enregistrez la liste dans un fichier pickle
-with open('training_cols.pkl', 'wb') as f:
-    pickle.dump(training_cols, f)
+""" with open('training_cols.pkl', 'wb') as f:
+    pickle.dump(training_cols, f)"""
 
 """
 This function serves to clean the incoming new data in production when it is on csv format

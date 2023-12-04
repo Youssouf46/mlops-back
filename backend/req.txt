@@ -1,0 +1,5 @@
+dvc==2.58.2
+mlflow==2.7.1
+fastapi==0.103.1
+uvicorn==0.23.2
+numpy==1.25.2

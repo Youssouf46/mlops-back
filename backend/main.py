@@ -1,25 +1,27 @@
-from operator import index
+#from operator import index
 import pandas as pd
+from itertools import combinations
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
-import pickle
-import sklearn
+#from datetime import datetime
+#import pickle
+#import sklearn
 from fastapi import FastAPI, File, UploadFile
 import uvicorn
 import sys  
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+#from pydantic import BaseModel
 import mlflow
-from models.transaction_info.TransactionModel import TransactionModel
+#from models.transaction_info.TransactionModel import TransactionModel
 import os
-from src.clean_data_csv import clean_data
+#from src.clean_data_csv import clean_data
 from src.clean_data_csv import find_stats
 from src.clean_data_csv import find_features
-from src.clean_data_json import clean_data_json
+#from src.clean_data_json import clean_data_json
 from operator import itemgetter
 import networkx as nx
 from networkx.drawing.nx_pydot import graphviz_layout
+import base64
 
 
 
@@ -108,7 +110,7 @@ def return_predictions(file_predict: UploadFile = File(...),data_file: UploadFil
      'E': [['Tunisia', 0, []],['Namibia', 0, []],['Mali', 0, []],['South Africa', 0, []]],
      'F': [['Congo', 0, []],['Zambia', 0, []],['Morocco', 0, []],['Tanzania', 0, []]]
       } '''
-    from itertools import combinations
+    
     matches=[]
     for letter in 'ABCDEF':
         for match in list(combinations(set(data_predict[letter]), 2)):
@@ -367,7 +369,7 @@ def return_predictions(file_predict: UploadFile = File(...),data_file: UploadFil
     
     
     # Côté serveur (FastAPI)
-    import base64
+    
 
     # Convertir l'image en base64
     image_base64 = base64.b64encode(file_bytes).decode("utf-8")
