@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "predeploy": [
+      "docker pull  registry.gitlab.com/20046/mlopsproject/docker-backend:latest",
+      "docker run -d -p 8080:8080 registry.gitlab.com/20046/mlopsproject/docker-backend:latest"
+    ]
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
